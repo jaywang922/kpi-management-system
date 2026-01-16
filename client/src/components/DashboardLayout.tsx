@@ -27,10 +27,31 @@ import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
-const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
-];
+import { FileText, ListTodo, Target, ClipboardList, Settings as SettingsIcon } from "lucide-react";
+
+// 根據使用者角色動態生成選單項目
+const getMenuItems = (userRole?: string) => {
+  const baseItems = [
+    { icon: LayoutDashboard, label: "首頁", path: "/" },
+    { icon: FileText, label: "工作日誌", path: "/work-logs" },
+    { icon: ListTodo, label: "我的任務", path: "/tasks" },
+    { icon: Target, label: "KPI追蹤", path: "/kpi" },
+    { icon: ClipboardList, label: "績效評估", path: "/performance" },
+  ];
+
+  if (userRole === "supervisor" || userRole === "chairman") {
+    baseItems.push(
+      { icon: Users, label: "團隊管理", path: "/team" },
+      { icon: LayoutDashboard, label: "儀表板", path: "/dashboard" }
+    );
+  }
+
+  if (userRole === "chairman" || userRole === "admin") {
+    baseItems.push({ icon: SettingsIcon, label: "系統設定", path: "/settings" });
+  }
+
+  return baseItems;
+};
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
 const DEFAULT_WIDTH = 280;
@@ -112,6 +133,7 @@ function DashboardLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const menuItems = getMenuItems(user?.role);
   const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
 
@@ -170,8 +192,9 @@ function DashboardLayoutContent({
               </button>
               {!isCollapsed ? (
                 <div className="flex items-center gap-2 min-w-0">
+                  <Target className="h-5 w-5 text-primary shrink-0" />
                   <span className="font-semibold tracking-tight truncate">
-                    Navigation
+                    KPI管理系統
                   </span>
                 </div>
               ) : null}

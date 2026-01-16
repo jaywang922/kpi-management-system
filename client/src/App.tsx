@@ -7,10 +7,37 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      
+      {/* TODO: 工作日誌相關路由 */}
+      {/* <Route path={"/work-logs"} component={WorkLogs} /> */}
+      
+      {/* TODO: 任務管理相關路由 */}
+      {/* <Route path={"/tasks"} component={Tasks} /> */}
+      
+      {/* TODO: KPI追蹤相關路由 */}
+      {/* <Route path={"/kpi"} component={KPI} /> */}
+      
+      {/* TODO: 績效評估相關路由 */}
+      {/* <Route path={"/performance"} component={Performance} /> */}
+      
+      {/* TODO: 團隊管理相關路由 (主管) */}
+      {/* <Route path={"/team"} component={Team} /> */}
+      
+      {/* TODO: 儀表板相關路由 (主管/董事長) */}
+      {/* <Route path={"/dashboard"} component={Dashboard} /> */}
+      
+      {/* TODO: 系統設定相關路由 (管理員) */}
+      {/* <Route path={"/settings"} component={Settings} /> */}
+      
+      {/* TODO: 通知中心 */}
+      {/* <Route path={"/notifications"} component={Notifications} /> */}
+      
+      {/* TODO: 個人資料 */}
+      {/* <Route path={"/profile"} component={Profile} /> */}
+      
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -18,18 +45,10 @@ function Router() {
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
           <Router />
