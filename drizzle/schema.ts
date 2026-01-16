@@ -45,7 +45,7 @@ export const positions = mysqlTable("positions", {
   id: int("id").autoincrement().primaryKey(),
   departmentId: int("departmentId").notNull(), // 所屬部門
   title: varchar("title", { length: 100 }).notNull(), // 職位名稱
-  level: mysqlEnum("level", ["staff", "specialist", "manager", "director", "vp"]).default("staff").notNull(),
+  level: mysqlEnum("level", ["staff", "supervisor", "manager", "director"]).default("staff").notNull(),
   description: text("description"), // 職位描述
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

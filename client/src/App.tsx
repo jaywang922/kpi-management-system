@@ -5,11 +5,13 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Settings from "./pages/Settings";
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/settings"} component={Settings} />
       
       {/* TODO: 工作日誌相關路由 */}
       {/* <Route path={"/work-logs"} component={WorkLogs} /> */}
@@ -28,9 +30,6 @@ function Router() {
       
       {/* TODO: 儀表板相關路由 (主管/董事長) */}
       {/* <Route path={"/dashboard"} component={Dashboard} /> */}
-      
-      {/* TODO: 系統設定相關路由 (管理員) */}
-      {/* <Route path={"/settings"} component={Settings} /> */}
       
       {/* TODO: 通知中心 */}
       {/* <Route path={"/notifications"} component={Notifications} /> */}

@@ -175,6 +175,187 @@ export async function getJobDutiesByPosition(positionId: number) {
   ).orderBy(jobDuties.sortOrder);
 }
 
+export async function getAllPositions() {
+  const db = await getDb();
+  if (!db) return [];
+
+  // 獲取所有職位並關聯部門資訊
+  return await db.select({
+    id: positions.id,
+    departmentId: positions.departmentId,
+    title: positions.title,
+    level: positions.level,
+    description: positions.description,
+    isActive: positions.isActive,
+    createdAt: positions.createdAt,
+    updatedAt: positions.updatedAt,
+    department: {
+      id: departments.id,
+      name: departments.name,
+      code: departments.code,
+    },
+  })
+  .from(positions)
+  .leftJoin(departments, eq(positions.departmentId, departments.id))
+  .orderBy(positions.createdAt);
+}
+
+export async function getAllJobDuties() {
+  const db = await getDb();
+  if (!db) return [];
+
+  // 獲取所有職控並關聯職位和部門資訊
+  const results = await db.select({
+    id: jobDuties.id,
+    positionId: jobDuties.positionId,
+    code: jobDuties.code,
+    title: jobDuties.title,
+    description: jobDuties.description,
+    category: jobDuties.category,
+    sortOrder: jobDuties.sortOrder,
+    isActive: jobDuties.isActive,
+    createdAt: jobDuties.createdAt,
+    updatedAt: jobDuties.updatedAt,
+    positionTitle: positions.title,
+    positionId2: positions.id,
+    departmentId: departments.id,
+    departmentName: departments.name,
+    departmentCode: departments.code,
+  })
+  .from(jobDuties)
+  .leftJoin(positions, eq(jobDuties.positionId, positions.id))
+  .leftJoin(departments, eq(positions.departmentId, departments.id))
+  .orderBy(jobDuties.sortOrder);
+
+  // 轉換為嵌套結構
+  return results.map(r => ({
+    id: r.id,
+    positionId: r.positionId,
+    code: r.code,
+    title: r.title,
+    description: r.description,
+    category: r.category,
+    sortOrder: r.sortOrder,
+    isActive: r.isActive,
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+    position: r.positionId2 ? {
+      id: r.positionId2,
+      title: r.positionTitle || '',
+      department: r.departmentId ? {
+        id: r.departmentId,
+        name: r.departmentName || '',
+        code: r.departmentCode || '',
+      } : null,
+    } : null,
+  }));
+}
+
+// 部門 CRUD
+export async function createDepartment(data: { name: string; code: string; description?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(departments).values(data);
+  return { id: Number(result[0].insertId), ...data };
+}
+
+export async function updateDepartment(id: number, data: { name: string; code: string; description?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(departments).set(data).where(eq(departments.id, id));
+  return { id, ...data };
+}
+
+export async function toggleDepartmentActive(id: number, isActive: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(departments).set({ isActive }).where(eq(departments.id, id));
+  return { id, isActive };
+}
+
+// 職位 CRUD
+export async function createPosition(data: {
+  departmentId: number;
+  title: string;
+  level: "staff" | "supervisor" | "manager" | "director";
+  description?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(positions).values(data);
+  return { id: Number(result[0].insertId), ...data };
+}
+
+export async function updatePosition(
+  id: number,
+  data: {
+    departmentId: number;
+    title: string;
+    level: "staff" | "supervisor" | "manager" | "director";
+    description?: string;
+  }
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(positions).set(data).where(eq(positions.id, id));
+  return { id, ...data };
+}
+
+export async function togglePositionActive(id: number, isActive: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(positions).set({ isActive }).where(eq(positions.id, id));
+  return { id, isActive };
+}
+
+// 職控 CRUD
+export async function createJobDuty(data: {
+  positionId: number;
+  code: string;
+  title: string;
+  description?: string;
+  category?: string;
+  sortOrder?: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(jobDuties).values(data);
+  return { id: Number(result[0].insertId), ...data };
+}
+
+export async function updateJobDuty(
+  id: number,
+  data: {
+    positionId: number;
+    code: string;
+    title: string;
+    description?: string;
+    category?: string;
+    sortOrder?: number;
+  }
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(jobDuties).set(data).where(eq(jobDuties.id, id));
+  return { id, ...data };
+}
+
+export async function toggleJobDutyActive(id: number, isActive: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(jobDuties).set({ isActive }).where(eq(jobDuties.id, id));
+  return { id, isActive };
+}
+
 /**
  * ==========================================
  * 工作日誌相關查詢

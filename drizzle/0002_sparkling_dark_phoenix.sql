@@ -1,0 +1,1 @@
+ALTER TABLE `positions` MODIFY COLUMN `level` enum('staff','supervisor','manager','director') NOT NULL DEFAULT 'staff';

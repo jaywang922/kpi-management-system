@@ -35,6 +35,11 @@ const organizationRouter = router({
     return await db.getAllDepartments();
   }),
 
+  // 獲取所有職位
+  getPositions: protectedProcedure.query(async () => {
+    return await db.getAllPositions();
+  }),
+
   // 獲取部門下的職位
   getPositionsByDepartment: protectedProcedure
     .input(z.object({ departmentId: z.number() }))
@@ -42,11 +47,144 @@ const organizationRouter = router({
       return await db.getPositionsByDepartment(input.departmentId);
     }),
 
-  // 獲取職位的職掌
+  // 獲取職位的職控
   getJobDutiesByPosition: protectedProcedure
     .input(z.object({ positionId: z.number() }))
     .query(async ({ input }) => {
       return await db.getJobDutiesByPosition(input.positionId);
+    }),
+
+  // 獲取所有職控
+  getJobDuties: protectedProcedure.query(async () => {
+    return await db.getAllJobDuties();
+  }),
+
+  // 部門管理 (CRUD)
+  createDepartment: protectedProcedure
+    .input(z.object({
+      name: z.string(),
+      code: z.string(),
+      description: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user?.role !== 'admin' && ctx.user?.role !== 'chairman') {
+        throw new TRPCError({ code: 'FORBIDDEN', message: '只有管理員和董事長可以管理部門' });
+      }
+      return await db.createDepartment(input);
+    }),
+
+  updateDepartment: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+      name: z.string(),
+      code: z.string(),
+      description: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user?.role !== 'admin' && ctx.user?.role !== 'chairman') {
+        throw new TRPCError({ code: 'FORBIDDEN', message: '只有管理員和董事長可以管理部門' });
+      }
+      return await db.updateDepartment(input.id, input);
+    }),
+
+  toggleDepartmentActive: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+      isActive: z.boolean(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user?.role !== 'admin' && ctx.user?.role !== 'chairman') {
+        throw new TRPCError({ code: 'FORBIDDEN', message: '只有管理員和董事長可以管理部門' });
+      }
+      return await db.toggleDepartmentActive(input.id, input.isActive);
+    }),
+
+  // 職位管理 (CRUD)
+  createPosition: protectedProcedure
+    .input(z.object({
+      departmentId: z.number(),
+      title: z.string(),
+      level: z.enum(['staff', 'supervisor', 'manager', 'director']),
+      description: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user?.role !== 'admin' && ctx.user?.role !== 'chairman') {
+        throw new TRPCError({ code: 'FORBIDDEN', message: '只有管理員和董事長可以管理職位' });
+      }
+      return await db.createPosition(input);
+    }),
+
+  updatePosition: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+      departmentId: z.number(),
+      title: z.string(),
+      level: z.enum(['staff', 'supervisor', 'manager', 'director']),
+      description: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user?.role !== 'admin' && ctx.user?.role !== 'chairman') {
+        throw new TRPCError({ code: 'FORBIDDEN', message: '只有管理員和董事長可以管理職位' });
+      }
+      return await db.updatePosition(input.id, input);
+    }),
+
+  togglePositionActive: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+      isActive: z.boolean(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user?.role !== 'admin' && ctx.user?.role !== 'chairman') {
+        throw new TRPCError({ code: 'FORBIDDEN', message: '只有管理員和董事長可以管理職位' });
+      }
+      return await db.togglePositionActive(input.id, input.isActive);
+    }),
+
+  // 職控管理 (CRUD)
+  createJobDuty: protectedProcedure
+    .input(z.object({
+      positionId: z.number(),
+      code: z.string(),
+      title: z.string(),
+      description: z.string().optional(),
+      category: z.string().optional(),
+      sortOrder: z.number().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user?.role !== 'admin' && ctx.user?.role !== 'chairman') {
+        throw new TRPCError({ code: 'FORBIDDEN', message: '只有管理員和董事長可以管理職控' });
+      }
+      return await db.createJobDuty(input);
+    }),
+
+  updateJobDuty: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+      positionId: z.number(),
+      code: z.string(),
+      title: z.string(),
+      description: z.string().optional(),
+      category: z.string().optional(),
+      sortOrder: z.number().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user?.role !== 'admin' && ctx.user?.role !== 'chairman') {
+        throw new TRPCError({ code: 'FORBIDDEN', message: '只有管理員和董事長可以管理職控' });
+      }
+      return await db.updateJobDuty(input.id, input);
+    }),
+
+  toggleJobDutyActive: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+      isActive: z.boolean(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user?.role !== 'admin' && ctx.user?.role !== 'chairman') {
+        throw new TRPCError({ code: 'FORBIDDEN', message: '只有管理員和董事長可以管理職控' });
+      }
+      return await db.toggleJobDutyActive(input.id, input.isActive);
     }),
 });
 
